@@ -3,11 +3,9 @@ title: "rvesting-movies"
 author: "Silas Bamidele"
 date: "2023-08-02"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 ## Harvesting IMDB Movies with RVest
 
@@ -20,7 +18,7 @@ library(rvest)
 url <- "https://imdb.com/chart/top"
 top_movies <- read_html(url)   #read the supplied url with read_html -- powered by rvest
 top_movies %>% 
-  html_nodes("ul.ipc-metadata-list li div.cli-children h3") %>%  #pipe top_movies into html_nodes and html_text -- most important here 
+  html_nodes("ul.ipc-metadata-list li div.cli-children h3") %>%  #pipe top_movies into html_nodes and html_text 
   html_text() -> top_movies
 
 top_movies %>% 
@@ -30,12 +28,15 @@ top_movies %>%
 top_movies %>%  #outputs as a list here, so let's unlist
   unlist() -> top_movies  # after unlisting, you then get a vector of characters, with the movie names
 
-#You can drill down into individual characters with top_movies[index] -- whr index is the index number
+#You can drill down into individual characters with top_movies[index] -- where index is the index number
 #top_movies[1] -- returns [1] "1. The Shawshank Redemption19942h 22m12A9.3Rate"
 
 
   top_movies %>% 
     str_replace("^\\d+\\.\\s*", "") -> top_movies
+  
+  top_movies %>% 
+    as.character() -> top_movies #type casting
   
   top_movies
   
@@ -51,14 +52,14 @@ library(rvest)
 url <- "https://imdb.com/chart/top"
 top_movies <- read_html(url)   #read the supplied url with read_html -- powered by rvest
 top_movies %>% 
-  html_nodes("ul.ipc-metadata-list li div.cli-title-metadata") %>%  #pipe into html_nodes and html_text -- most important here 
+  html_nodes("ul.ipc-metadata-list li div.cli-title-metadata") %>%  #pipe top_movies into html_nodes and html_text 
   html_text() -> top_years
 
 top_years %>% 
   str_extract("\\d{4}") -> top_years # extracts the year values from the data
 
 top_years %>% 
-  as.integer() -> top_years
+  as.integer() -> top_years #type casting to integer
 
 ```
 
@@ -75,11 +76,9 @@ top_movies %>%
   html_text() -> top_ratings  # returns all ratings in char format. Let's change to numeric
 
 top_ratings %>% 
-  as.numeric() -> top_ratings
+  as.numeric() -> top_ratings #type casting
 
 top_ratings
-# Sat Jul 15 14:19:34 2023 ------------------------------
-
 
 ```
 
@@ -96,11 +95,29 @@ tibble(
        ) -> imdb_top_250
 
 imdb_top_250 %>% 
-  arrange(Movie_Years) -> imdb  #to see the earliest movie f.ex in the top movies
+  arrange(Movie_Years) -> imdb  #to see the earliest movie made, for example, in the top 250 movies
 
 imdb
 
 ```
 
+Writing the tibble to csv
+```{r}
+# Load the readr package
+library(readr)
+
+
+# Tibble to write
+my_tibble <- imdb_top_250
+
+# Define the path where you want to save the CSV file
+file_path <- "/home/silas/rvesting-movies/top_250_movies.csv"
+
+#Notice the path includes a file name
+
+# Write the tibble to a CSV file
+write_csv(my_tibble, file_path)
+
+```
 
 
